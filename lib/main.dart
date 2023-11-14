@@ -188,6 +188,8 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
     'XAU': 'Ouro (1 onça troy)',
   };
 
+  bool exibirHistorico = false;
+
   @override
   void initState() {
     super.initState();
@@ -213,8 +215,28 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
       setState(() {
         historicoConversoes.insert(0, resultadoFormatado);
       });
+
+      // Mostrar um SnackBar com o resultado e o botão para ver o histórico
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(resultadoFormatado),
+          action: SnackBarAction(
+            label: 'Ver Histórico',
+            onPressed: () {
+              setState(() {
+                exibirHistorico = true;
+              });
+            },
+          ),
+        ),
+      );
     } else {
-      throw Exception('Falha ao carregar as taxas de câmbio');
+      // Mostrar um SnackBar em caso de falha
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Falha ao carregar as taxas de câmbio'),
+        ),
+      );
     }
   }
 
@@ -318,14 +340,18 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
   }
 
   Widget _construirHistoricoConversoes() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Histórico de Conversões',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              exibirHistorico = !exibirHistorico;
+            });
+          },
+          child: Text('Histórico de Conversões'),
+        ),
+        if (exibirHistorico)
           Expanded(
             child: ListView.builder(
               itemCount: historicoConversoes.length,
@@ -336,8 +362,7 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
               },
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }
